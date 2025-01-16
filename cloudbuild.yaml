@@ -1,0 +1,109 @@
+#serviceAccount: infra-service-account@win-gke-cicd.iam.gserviceaccount.com
+
+steps:
+  # Step 1: Build the Docker image
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'Build Docker Image'
+    args: ['build', '-t', 'us-central1-docker.pkg.dev/${_PROJECT_ID}/${_ARTIFACT_REPO}/my-flask-app:$SHORT_SHA', '.']
+
+  # Step 2: Push the Docker image to Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'Push Docker Image'
+    args: ['push', 'us-central1-docker.pkg.dev/${_PROJECT_ID}/${_ARTIFACT_REPO}/my-flask-app:$SHORT_SHA']
+
+  # Step 3: Debug Step - Check environment variables before deployment
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: 'Debug Environment Variables'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        echo "Active Service Account:"
+        gcloud auth list
+        echo "Debugging Environment Variables:"
+        echo "PROJECT_ID: ${_PROJECT_ID}"
+        echo "PROJECT_NUMBER: ${_PROJECT_NUMBER}"
+        echo "INSTANCE_CONNECTION_NAME: ${_INSTANCE_CONNECTION_NAME}"
+
+        # Explicitly set the project context
+        gcloud config set project ${_PROJECT_ID}
+
+        echo "Checking Authentication:"
+        gcloud auth print-access-token
+
+        gcloud iam roles describe roles/iam.serviceAccountTokenCreator
+        gcloud auth list
+
+        echo "Testing secret access..."
+        gcloud secrets versions access latest --secret=db_user
+        gcloud secrets versions access latest --secret=db_password
+
+        # Fetch secrets manually from Google Cloud Secret Manager
+        _DB_USER=$(gcloud secrets versions access latest --secret=db_user --project=${_PROJECT_ID} --impersonate-service-account=infra-service-account@win-gke-cicd.iam.gserviceaccount.com)
+        _DB_PASSWORD=$(gcloud secrets versions access latest --secret=db_password --project=${_PROJECT_ID} --impersonate-service-account=infra-service-account@win-gke-cicd.iam.gserviceaccount.com)
+
+        echo "Fetched DB_USER (from Secret Manager): ${_DB_USER}"
+        echo "Fetched DB_PASSWORD (from Secret Manager): ${_DB_PASSWORD}"
+
+  
+
+
+  # Step 4: Deploy the image to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: 'Deploy to Cloud Run'
+    entrypoint: 'gcloud'
+    args:
+      - 'run'
+      - 'deploy'
+      - 'my-flask-service'
+      - '--image=us-central1-docker.pkg.dev/${_PROJECT_ID}/${_ARTIFACT_REPO}/my-flask-app:$SHORT_SHA'
+      - '--region=us-central1'
+      - '--platform=managed'
+      - '--allow-unauthenticated'
+      - '--set-cloudsql-instances=${_INSTANCE_CONNECTION_NAME}'
+      - '--service-account=${_CUSTOM_SERVICE_ACCOUNT}'
+      - '--update-secrets=DB_USER=projects/${_PROJECT_NUMBER}/secrets/db_user:latest,DB_PASSWORD=projects/${_PROJECT_NUMBER}/secrets/db_password:latest'
+      - '--update-env-vars=INSTANCE_CONNECTION_NAME=${_INSTANCE_CONNECTION_NAME},DB_NAME=my_database'
+
+
+
+  # Step 5: Verify the deployment status
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: 'Check Deployment Status'
+    entrypoint: 'gcloud'
+    args:
+      - 'run'
+      - 'services'
+      - 'describe'
+      - 'my-flask-service'
+      - '--region=us-central1'
+
+
+images:
+  - 'us-central1-docker.pkg.dev/${_PROJECT_ID}/${_ARTIFACT_REPO}/my-flask-app:$SHORT_SHA'
+
+timeout: '1200s'
+
+
+substitutions:
+  _PROJECT_ID: "mor-fun-lab"
+  _PROJECT_NUMBER: '650839457214'
+  _ARTIFACT_REPO: "mor-art"
+  _INSTANCE_CONNECTION_NAME: "mor-fun-lab:us-central1:my-postgres-instance"
+  _CUSTOM_SERVICE_ACCOUNT: "sa-cicd-app@mor-fun-lab.iam.gserviceaccount.com"
+  _DB_USER: ''
+  _DB_PASSWORD: ''
+
+
+logsBucket: "gs://morxxx-fun-app-logs"
+
+#options:
+#  logging: CLOUD_LOGGING_ONLY
+#options:
+#  serviceAccount: infra-service-account@win-gke-cicd.iam.gserviceaccount.com
+
+
+
+#  my-postgres-instance
+# $ gcloud sql instances describe my-postgres-instance --format="value(connectionName)"
+# win-gke-cicd:us-central1:my-postgres-instance
