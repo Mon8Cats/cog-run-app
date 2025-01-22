@@ -37,44 +37,28 @@ steps:
         echo "Secrets fetched."
 
 
-  # Debugging step: Before deployment to Cloud Run
+  # Step 4: Debug Reading Secrets
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    id: 'Debug Before Deployment'
-    entrypoint: 'bash'
-    args:
-      - '-c'
-      - |
-        echo "Environment Variables Before Deployment:"
-        echo "INSTANCE_CONNECTION_NAME: ${_INSTANCE_CONNECTION_NAME}"
-
-  # Step 4: Deploy to Cloud Run
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    id: 'Deploy to Cloud Run'
+    id: 'Debug Reading Secrets'
     entrypoint: 'bash'
     args:
       - '-c'
       - |
         echo "Reading Secrets..."
-        DB_USER=$(cat /workspace/DB_USER)
-        DB_PASSWORD=$(cat /workspace/DB_PASSWORD)
-        echo "DB_USER: $DB_USER"
-        echo "DB_PASSWORD: [HIDDEN]" # Avoid printing sensitive values
-        echo "Deploying to Cloud Run..."
+        if [ -f /workspace/DB_USER ]; then
+          DB_USER=$(cat /workspace/DB_USER)
+          echo "DB_USER: $DB_USER"
+        else
+          echo "DB_USER file does not exist!"
+        fi
 
-  # Debugging step: Check environment variables and substitutions after build
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    id: 'Debug After Build'
-    entrypoint: 'bash'
-    args:
-      - '-c'
-      - |
-        echo "Environment Variables and Substitutions After Build:"
-        env
-        echo "Substitutions:"
-        echo "PROJECT_ID: ${_PROJECT_ID}"
-        echo "PROJECT_NUMBER: ${_PROJECT_NUMBER}"
-        echo "LOG_BUCKET: ${_LOG_BUCKET}"
-        echo "INSTANCE_CONNECTION_NAME: ${_INSTANCE_CONNECTION_NAME}"
+        if [ -f /workspace/DB_PASSWORD ]; then
+          DB_PASSWORD=$(cat /workspace/DB_PASSWORD)
+          echo "DB_PASSWORD is fetched and hidden."
+        else
+          echo "DB_PASSWORD file does not exist!"
+        fi
+
         
 images:
   - 'us-central1-docker.pkg.dev/${_PROJECT_ID}/${_ARTIFACT_REPO}/${_APP_NAME}:$SHORT_SHA'
