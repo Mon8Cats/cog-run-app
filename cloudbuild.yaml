@@ -36,12 +36,6 @@ steps:
         gcloud secrets versions access latest --secret=db-user
         gcloud secrets versions access latest --secret=db-password
 
-        # Fetch secrets manually from Google Cloud Secret Manager
-        _DB_USER=$(gcloud secrets versions access latest --secret=db-user --project=${_PROJECT_ID})
-        _DB_PASSWORD=$(gcloud secrets versions access latest --secret=db-password --project=${_PROJECT_ID})
-
-        echo "Fetched DB_USER (from Secret Manager): ${_DB_USER}"
-        echo "Fetched DB_PASSWORD (from Secret Manager): ${_DB_PASSWORD}"
 
   # Step 4: Deploy the image to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
