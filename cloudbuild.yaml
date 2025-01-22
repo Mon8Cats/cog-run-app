@@ -32,9 +32,6 @@ steps:
         gcloud iam roles describe roles/iam.serviceAccountTokenCreator
         gcloud auth list
 
-        echo "Testing secret access..."
-        gcloud secrets versions access latest --secret=db-user
-        gcloud secrets versions access latest --secret=db-password
 
 
   # Step 4: Deploy the image to Cloud Run
@@ -44,7 +41,7 @@ steps:
     args:
       - 'run'
       - 'deploy'
-      - 'my-flask-service'
+      - 'my-flask123'
       - '--image=us-central1-docker.pkg.dev/${_PROJECT_ID}/${_ARTIFACT_REPO}/${_APP_NAME}:$SHORT_SHA'
       - '--region=us-central1'
       - '--platform=managed'
@@ -59,7 +56,7 @@ steps:
       - 'run'
       - 'services'
       - 'describe'
-      - 'my-flask-service'
+      - 'my-flask123'
       - '--region=us-central1'
 
       
