@@ -57,7 +57,30 @@ steps:
         else
           echo "DB_PASSWORD file does not exist!"
         fi
-        
+
+  # Step 4: Debug Reading Secrets
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: 'Debug Reading Secrets'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        echo "Reading Secrets..."
+        if [ -f /workspace/DB_USER ]; then
+          DB_USER=$(cat /workspace/DB_USER)
+          echo "DB_USER: $DB_USER"
+        else
+          echo "DB_USER file does not exist!"
+        fi
+
+        if [ -f /workspace/DB_PASSWORD ]; then
+          DB_PASSWORD=$(cat /workspace/DB_PASSWORD)
+          echo "DB_PASSWORD is fetched and hidden."
+        else
+          echo "DB_PASSWORD file does not exist!"
+        fi
+
+
 images:
   - 'us-central1-docker.pkg.dev/${_PROJECT_ID}/${_ARTIFACT_REPO}/${_APP_NAME}:$SHORT_SHA'
 
