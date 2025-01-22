@@ -36,28 +36,27 @@ steps:
         gcloud secrets versions access latest --secret=db-password > /workspace/DB_PASSWORD
         echo "Secrets fetched."
 
-
-  # Step 4: Debug Reading Secrets
+  # Debugging Step: Verify Secrets Files
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    id: 'Debug Reading Secrets'
+    id: 'Debug Secret Files'
     entrypoint: 'bash'
     args:
       - '-c'
       - |
-        echo "Reading Secrets..."
+        echo "Debugging Secrets Files..."
         if [ -f /workspace/DB_USER ]; then
-          DB_USER=$(cat /workspace/DB_USER)
-          echo "DB_USER: $DB_USER"
+          echo "DB_USER file exists."
         else
           echo "DB_USER file does not exist!"
         fi
 
         if [ -f /workspace/DB_PASSWORD ]; then
-          DB_PASSWORD=$(cat /workspace/DB_PASSWORD)
-          echo "DB_PASSWORD is fetched and hidden."
+          echo "DB_PASSWORD file exists."
+          echo "DB_PASSWORD contents: [HIDDEN]"
         else
           echo "DB_PASSWORD file does not exist!"
         fi
+
 
         
 images:
