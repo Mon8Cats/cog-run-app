@@ -10,8 +10,9 @@ steps:
         env
         echo "Substitutions:"
         echo "PROJECT_ID: ${_PROJECT_ID}"
-        echo "INSTANCE_CONNECTION_NAME: ${_INSTANCE_CONNECTION_NAME}"
+        echo "PROJECT_NUMBER: ${_PROJECT_NUMBER}"
         echo "LOG_BUCKET: ${_LOG_BUCKET}"
+        echo "INSTANCE_CONNECTION_NAME: ${_INSTANCE_CONNECTION_NAME}"
 
   # Step 1: Build the Docker image
   - name: 'gcr.io/cloud-builders/docker'
@@ -24,6 +25,22 @@ steps:
     args: ['push', 'us-central1-docker.pkg.dev/${_PROJECT_ID}/${_ARTIFACT_REPO}/${_APP_NAME}:$SHORT_SHA']
 
 
+
+  # Debugging step: Check environment variables and substitutions after build
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: 'Debug After Build'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        echo "Environment Variables and Substitutions After Build:"
+        env
+        echo "Substitutions:"
+        echo "PROJECT_ID: ${_PROJECT_ID}"
+        echo "PROJECT_NUMBER: ${_PROJECT_NUMBER}"
+        echo "LOG_BUCKET: ${_LOG_BUCKET}"
+        echo "INSTANCE_CONNECTION_NAME: ${_INSTANCE_CONNECTION_NAME}"
+        
 images:
   - 'us-central1-docker.pkg.dev/${_PROJECT_ID}/${_ARTIFACT_REPO}/${_APP_NAME}:$SHORT_SHA'
 
