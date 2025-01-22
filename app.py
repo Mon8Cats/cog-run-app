@@ -5,8 +5,8 @@ from flask import Flask
 app = Flask(__name__)
 
 # Configure the PostgreSQL connection
-DB_USER = os.getenv("DB_USER")  # Now retrieved from environment variables
-DB_PASSWORD = os.getenv("DB_PASSWORD")
+DB_USER = os.getenv("DB_USER", "db-user")  # Now retrieved from environment variables
+DB_PASSWORD = os.getenv("DB_PASSWORD", "db-password")
 DB_NAME = os.getenv("DB_NAME", "spn-db")
 CLOUD_SQL_CONNECTION_NAME = os.getenv("INSTANCE_CONNECTION_NAME")  # Format: project:region:instance
 
