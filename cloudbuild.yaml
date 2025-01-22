@@ -24,12 +24,11 @@ steps:
     id: 'Push Docker Image'
     args: ['push', 'us-central1-docker.pkg.dev/${_PROJECT_ID}/${_ARTIFACT_REPO}/${_APP_NAME}:$SHORT_SHA']
 
-
-
-  # Step 4: Deploy to Cloud Run
+  # Step 3: Deploy to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     id: 'Deploy to Cloud Run'
     entrypoint: 'bash'
+    secretEnv: ['DB_USER', 'DB_PASSWORD']
     args:
       - '-c'
       - |
@@ -39,12 +38,11 @@ steps:
           --region=us-central1 \
           --platform=managed \
           --allow-unauthenticated \
-          --service-account="$_SA_CLOUD_RUN" \
+          --service-account="sa-cloud-run@spn-run.iam.gserviceaccount.com" \
           --add-cloudsql-instances=spn-run:us-central1:spn-sql \
-          --set-env-vars DB_USER="$_DB_USER" \
-          --set-env-vars DB_PASSWORD="$_DB_PASSWORD" \
+          --set-env-vars DB_USER="$DB_USER" \
+          --set-env-vars DB_PASSWORD="$DB_PASSWORD" \
           --set-env-vars INSTANCE_CONNECTION_NAME="${_INSTANCE_CONNECTION_NAME}"
-  
 
 images:
   - 'us-central1-docker.pkg.dev/${_PROJECT_ID}/${_ARTIFACT_REPO}/${_APP_NAME}:$SHORT_SHA'
@@ -55,10 +53,14 @@ substitutions:
   _APP_NAME: "my-flask1"
   _ARTIFACT_REPO: "spn-art"
   _INSTANCE_CONNECTION_NAME: "spn-run:us-central1:spn-sql"
-  _DB_USER: "db-user"
-  _DB_PASSWORD: "db-password"
-  _DB_NAME: "spn-db"
-  _SA_CLOUD_RUN: "sa-cloud-run@spn-run.iam.gserviceaccount.com"
+  _PROJECT_ID: "your-project-id"
+  _PROJECT_NUMBER: "your-project-number"
+  _LOG_BUCKET: "your-log-bucket"
+
+secrets:
+  - secretEnv:
+      DB_USER: projects/spn-run/secrets/db-user/versions/latest
+      DB_PASSWORD: projects/spn-run/secrets/db-password/versions/latest
 
 options:
   env:
@@ -67,3 +69,4 @@ options:
     - LOG_BUCKET=${_LOG_BUCKET}
 
 logsBucket: "gs://${_LOG_BUCKET}"
+
