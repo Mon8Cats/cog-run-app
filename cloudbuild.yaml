@@ -58,27 +58,23 @@ steps:
           echo "DB_PASSWORD file does not exist!"
         fi
 
-  # Step 4: Debug Reading Secrets
+  
+  # Step: Safely Read and Assign DB_USER
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    id: 'Debug Reading Secrets'
+    id: 'Debug Safe DB_USER Assignment'
     entrypoint: 'bash'
     args:
       - '-c'
       - |
-        echo "Reading Secrets..."
+        echo "Safely assigning DB_USER..."
         if [ -f /workspace/DB_USER ]; then
-          DB_USER2=$(cat /workspace/DB_USER)
-          echo "DB_USER: $DB_USER2"
+          DB_USER=$(cat /workspace/DB_USER | tr -d '\n' | xargs)
+          echo "Assigned DB_USER: $DB_USER"
+          echo "Length of DB_USER: ${#DB_USER}"
         else
           echo "DB_USER file does not exist!"
         fi
-
-        if [ -f /workspace/DB_PASSWORD ]; then
-          DB_PASSWORD2=$(cat /workspace/DB_PASSWORD)
-          echo "DB_PASSWORD is fetched and hidden."
-        else
-          echo "DB_PASSWORD file does not exist!"
-        fi
+  
 
 
 images:
