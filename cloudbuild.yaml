@@ -67,9 +67,9 @@ steps:
       - '-c'
       - |
         echo "Safely assigning DB_USER..."
-        _DB_USER=$(cat /workspace/DB_USER)
+        _DB_USER=$(cat /workspace/DB_USER | tr -d '\n' | xargs)
         echo "DB_USER contents: $(_DB_USER)"
-        _DB_PASSWORD=$(cat /workspace/DB_PASSWORD)
+        _DB_PASSWORD=$(cat /workspace/DB_PASSWORD | tr -d '\n' | xargs)
         echo "DB_PASSWORD contents: $(_DB_PASSWORD)"
 
   
