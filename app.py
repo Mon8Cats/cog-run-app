@@ -8,7 +8,7 @@ app = Flask(__name__)
 DB_USER = os.getenv("DB_USER", "db-user")
 DB_PASSWORD = os.getenv("DB_PASSWORD", "db-password")
 DB_NAME = os.getenv("DB_NAME", "spn-db")
-CLOUD_SQL_CONNECTION_NAME = os.getenv("spn-run:us-central1:spn-sql")  # Format: project:region:instance
+CLOUD_SQL_CONNECTION_NAME = os.getenv("CLOUD_SQL_CONNECTION_NAME","spn-run:us-central1:spn-sql")  # Format: project:region:instance
 
 # Unix socket path
 DB_HOST = f"/cloudsql/{CLOUD_SQL_CONNECTION_NAME}"
