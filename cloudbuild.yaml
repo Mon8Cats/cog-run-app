@@ -32,47 +32,12 @@ steps:
       - '-c'
       - |
         echo "Fetching Secrets..."
-        gcloud secrets versions access latest --secret=db-user > /workspace/DB_USER
-        gcloud secrets versions access latest --secret=db-password > /workspace/DB_PASSWORD
+        _DB_USER=$(gcloud secrets versions access latest --secret=db-user)
+        echo "DB_USER: $_DB_USER"
+        _DB_PASSWORD=$(gcloud secrets versions access latest --secret=db-password)
+        echo "DB_USER: $_DB_USER"
         echo "Secrets fetched."
 
-  # Debugging Step: Verify Secrets Files
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    id: 'Debug Secret Files'
-    entrypoint: 'bash'
-    args:
-      - '-c'
-      - |
-        echo "Debugging Secrets Files..."
-        if [ -f /workspace/DB_USER ]; then
-          echo "DB_USER file exists."
-          echo "DB_USER contents: $(cat /workspace/DB_USER)"
-        else
-          echo "DB_USER file does not exist!"
-        fi
-
-        if [ -f /workspace/DB_PASSWORD ]; then
-          echo "DB_PASSWORD file exists."
-          echo "DB_PASSWORD contents: [HIDDEN]"
-        else
-          echo "DB_PASSWORD file does not exist!"
-        fi
-
-  
-  # Step: Safely Read and Assign DB_USER
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    id: 'Debug Safe DB_USER Assignment'
-    entrypoint: 'bash'
-    args:
-      - '-c'
-      - |
-        echo "Safely assigning DB_USER..."
-        _DB_USER=$(cat /workspace/DB_USER | tr -d '\n' | xargs)
-        echo "DB_USER contents: $(_DB_USER)"
-        echo $_DB_USER
-        _DB_PASSWORD=$(cat /workspace/DB_PASSWORD | tr -d '\n' | xargs)
-        echo "DB_PASSWORD contents: $(_DB_PASSWORD)"
-        echo $_DB_PASSWORD
 
   
 
