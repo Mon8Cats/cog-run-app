@@ -67,14 +67,14 @@ steps:
       - |
         echo "Reading Secrets..."
         if [ -f /workspace/DB_USER ]; then
-          DB_USER=$(cat /workspace/DB_USER)
-          echo "DB_USER: $DB_USER"
+          DB_USER2=$(cat /workspace/DB_USER)
+          echo "DB_USER: $DB_USER2"
         else
           echo "DB_USER file does not exist!"
         fi
 
         if [ -f /workspace/DB_PASSWORD ]; then
-          DB_PASSWORD=$(cat /workspace/DB_PASSWORD)
+          DB_PASSWORD2=$(cat /workspace/DB_PASSWORD)
           echo "DB_PASSWORD is fetched and hidden."
         else
           echo "DB_PASSWORD file does not exist!"
