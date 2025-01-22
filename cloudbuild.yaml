@@ -67,15 +67,12 @@ steps:
       - '-c'
       - |
         echo "Safely assigning DB_USER..."
-        if [ -f /workspace/DB_USER ]; then
-          _DB_USER=$(cat /workspace/DB_USER | tr -d '\n' | xargs)
-          echo "Assigned DB_USER: $_DB_USER"
-          echo "Length of DB_USER: ${#_DB_USER}"
-        else
-          echo "DB_USER file does not exist!"
-        fi
-  
+        _DB_USER=$(cat /workspace/DB_USER)
+        echo "DB_USER contents: $(_DB_USER)"
+        _DB_PASSWORD=$(cat /workspace/DB_PASSWORD)
+        echo "DB_PASSWORD contents: $(_DB_PASSWORD)"
 
+  
 
 images:
   - 'us-central1-docker.pkg.dev/${_PROJECT_ID}/${_ARTIFACT_REPO}/${_APP_NAME}:$SHORT_SHA'
