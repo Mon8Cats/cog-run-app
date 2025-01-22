@@ -84,7 +84,7 @@ logsBucket: "gs://${_LOG_BUCKET}"
 substitutions:
   _ARTIFACT_REPO: "spn-art"
   _INSTANCE_CONNECTION_NAME: "spn-run:us-central1:spn-sql"
-  _CUSTOM_SERVICE_ACCOUNT: " "
+  _CUSTOM_SERVICE_ACCOUNT: "sa-cloud-run@spn-run.iam.gserviceaccount.com"
   _DB_USER: ''
   _DB_PASSWORD: ''
 

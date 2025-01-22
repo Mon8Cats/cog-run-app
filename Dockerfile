@@ -31,7 +31,7 @@ WORKDIR $APP_HOME
 COPY . ./
 
 # Copy any certificates if present.
-COPY ./certs /app/certs
+#COPY ./certs /app/certs
 
 # Run the web service on container startup. Here we use the gunicorn
 # webserver, with one worker process and 8 threads.
