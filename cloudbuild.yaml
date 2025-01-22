@@ -55,11 +55,6 @@ steps:
       - '--region=us-central1'
       - '--platform=managed'
       - '--allow-unauthenticated'
-      - '--set-cloudsql-instances=${_INSTANCE_CONNECTION_NAME}'
-      - '--service-account=${_CUSTOM_SERVICE_ACCOUNT}'
-      - '--update-secrets=DB_USER=projects/${_PROJECT_NUMBER}/secrets/db_user:latest,DB_PASSWORD=projects/${_PROJECT_NUMBER}/secrets/db_password:latest'
-      - '--update-env-vars=INSTANCE_CONNECTION_NAME=${_INSTANCE_CONNECTION_NAME},DB_NAME=my_database'
-
 
 
   # Step 5: Verify the deployment status
@@ -83,10 +78,8 @@ logsBucket: "gs://${_LOG_BUCKET}"
 
 substitutions:
   _ARTIFACT_REPO: "spn-art"
-  _INSTANCE_CONNECTION_NAME: "spn-run:us-central1:spn-sql"
   _CUSTOM_SERVICE_ACCOUNT: "sa-cloud-run@spn-run.iam.gserviceaccount.com"
-  _DB_USER: ''
-  _DB_PASSWORD: ''
+
 
 options:
   env:
