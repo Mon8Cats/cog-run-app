@@ -32,7 +32,10 @@ steps:
         gcloud iam roles describe roles/iam.serviceAccountTokenCreator
         gcloud auth list
 
-
+        echo "Testing secret access..."
+        gcloud secrets versions access latest --secret=db-user
+        gcloud secrets versions access latest --secret=db-password
+        echo "secret fetched?"
 
   # Step 4: Deploy the image to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
