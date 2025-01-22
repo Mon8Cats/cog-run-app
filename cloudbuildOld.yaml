@@ -46,20 +46,21 @@ steps:
         echo "DB_USER=$DB_USER" >> /workspace/env.list
         echo "DB_PASSWORD=$DB_PASSWORD" >> /workspace/env.list
 
-  # Step 4: Deploy to Cloud Run with secrets as environment variables
+  # Step 4: Deploy the image to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     id: 'Deploy to Cloud Run'
-    entrypoint: 'bash'
+    entrypoint: 'gcloud'
     args:
-      - '-c'
-      - |
-        gcloud run deploy my-flask123 \
-          --image=us-central1-docker.pkg.dev/${_PROJECT_ID}/${_ARTIFACT_REPO}/${_APP_NAME}:$SHORT_SHA \
-          --region=us-central1 \
-          --platform=managed \
-          --allow-unauthenticated \
-          --set-env-vars DB_USER=$(cat /workspace/env.list | grep DB_USER | cut -d'=' -f2) \
-          --set-env-vars DB_PASSWORD=$(cat /workspace/env.list | grep DB_PASSWORD | cut -d'=' -f2)
+      - 'run'
+      - 'deploy'
+      - 'my-flask123'
+      - '--image=us-central1-docker.pkg.dev/${_PROJECT_ID}/${_ARTIFACT_REPO}/${_APP_NAME}:$SHORT_SHA'
+      - '--region=us-central1'
+      - '--platform=managed'
+      - '--allow-unauthenticated'
+      - '--set-env-vars DB_USER=$(cat /workspace/env.list | grep DB_USER | cut -d'=' -f2) '
+      - '--set-env-vars DB_PASSWORD=$(cat /workspace/env.list | grep DB_PASSWORD | cut -d'=' -f2) '
+
 
   # Step 5: Verify the deployment status
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
