@@ -57,15 +57,9 @@ steps:
         echo "Reading Secrets..."
         DB_USER=$(cat /workspace/DB_USER)
         DB_PASSWORD=$(cat /workspace/DB_PASSWORD)
+        echo "DB_USER: $DB_USER"
+        echo "DB_PASSWORD: [HIDDEN]" # Avoid printing sensitive values
         echo "Deploying to Cloud Run..."
-        gcloud run deploy my-flask123 \
-          --image=us-central1-docker.pkg.dev/${_PROJECT_ID}/${_ARTIFACT_REPO}/${_APP_NAME}:$SHORT_SHA \
-          --region=us-central1 \
-          --platform=managed \
-          --allow-unauthenticated \
-          --set-env-vars DB_USER="$DB_USER" \
-          --set-env-vars DB_PASSWORD="$DB_PASSWORD" \
-          --set-env-vars INSTANCE_CONNECTION_NAME="${_INSTANCE_CONNECTION_NAME}"
 
   # Debugging step: Check environment variables and substitutions after build
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
