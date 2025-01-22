@@ -34,8 +34,10 @@ steps:
         echo "Fetching Secrets..."
         _DB_USER=$(gcloud secrets versions access latest --secret=db-user)
         echo "DB_USER: $_DB_USER"
+        echo _DB_USER
         _DB_PASSWORD=$(gcloud secrets versions access latest --secret=db-password)
-        echo "DB_USER: $_DB_USER"
+        echo "DB_PASSWORD: $_DB_PASSWORD"
+        echo _DB_PASSWORD
         echo "Secrets fetched."
 
 
