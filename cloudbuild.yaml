@@ -9,9 +9,9 @@ steps:
     id: 'Push Docker Image'
     args: ['push', 'us-central1-docker.pkg.dev/${_PROJECT_ID}/${_ARTIFACT_REPO}/${_APP_NAME}:$SHORT_SHA']
 
-  # Step 3: Fetch secrets from Secret Manager
+  # Step 3: Fetch secrets and pass them to the Cloud Run deployment
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    id: 'Fetch Secrets'
+    id: 'Deploy to Cloud Run'
     entrypoint: 'bash'
     args:
       - '-c'
@@ -21,25 +21,15 @@ steps:
         export DB_PASSWORD=$(gcloud secrets versions access latest --secret=db-password)
         echo "Secrets fetched."
 
-        # Save secrets to environment variable file
-        echo "DB_USER=$DB_USER" >> /workspace/env.list
-        echo "DB_PASSWORD=$DB_PASSWORD" >> /workspace/env.list
-
-  # Step 4: Deploy the image to Cloud Run with secrets as environment variables
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    id: 'Deploy to Cloud Run'
-    entrypoint: 'bash'
-    args:
-      - '-c'
-      - |
+        echo "Deploying to Cloud Run..."
         gcloud run deploy my-flask123 \
           --image=us-central1-docker.pkg.dev/${_PROJECT_ID}/${_ARTIFACT_REPO}/${_APP_NAME}:$SHORT_SHA \
           --region=us-central1 \
           --platform=managed \
           --allow-unauthenticated \
-          --set-env-vars DB_USER=$(cat /workspace/env.list | grep DB_USER | cut -d'=' -f2) \
-          --set-env-vars DB_PASSWORD=$(cat /workspace/env.list | grep DB_PASSWORD | cut -d'=' -f2) \
-          --set-env-vars INSTANCE_CONNECTION_NAME=${_INSTANCE_CONNECTION_NAME}
+          --set-env-vars DB_USER="$DB_USER" \
+          --set-env-vars DB_PASSWORD="$DB_PASSWORD" \
+          --set-env-vars INSTANCE_CONNECTION_NAME="${_INSTANCE_CONNECTION_NAME}"
 
 images:
   - 'us-central1-docker.pkg.dev/${_PROJECT_ID}/${_ARTIFACT_REPO}/${_APP_NAME}:$SHORT_SHA'
@@ -50,7 +40,6 @@ substitutions:
   _APP_NAME: "my-flask1"
   _ARTIFACT_REPO: "spn-art"
   _INSTANCE_CONNECTION_NAME: "spn-run:us-central1:spn-sql"
-
 
 options:
   env:
