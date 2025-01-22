@@ -17,15 +17,15 @@ steps:
       - '-c'
       - |
         echo "Fetching Secrets..."
-        DB_USER=$(gcloud secrets versions access latest --secret=db-user)
-        DB_PASSWORD=$(gcloud secrets versions access latest --secret=db-password)
+        export DB_USER=$(gcloud secrets versions access latest --secret=db-user)
+        export DB_PASSWORD=$(gcloud secrets versions access latest --secret=db-password)
         echo "Secrets fetched."
 
-        # Save secrets to a temporary file for later steps
+        # Save secrets to environment variable file
         echo "DB_USER=$DB_USER" >> /workspace/env.list
         echo "DB_PASSWORD=$DB_PASSWORD" >> /workspace/env.list
 
-  # Step 4: Deploy the image to Cloud Run and set environment variables
+  # Step 4: Deploy the image to Cloud Run with secrets as environment variables
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     id: 'Deploy to Cloud Run'
     entrypoint: 'bash'
@@ -38,7 +38,8 @@ steps:
           --platform=managed \
           --allow-unauthenticated \
           --set-env-vars DB_USER=$(cat /workspace/env.list | grep DB_USER | cut -d'=' -f2) \
-          --set-env-vars DB_PASSWORD=$(cat /workspace/env.list | grep DB_PASSWORD | cut -d'=' -f2)
+          --set-env-vars DB_PASSWORD=$(cat /workspace/env.list | grep DB_PASSWORD | cut -d'=' -f2) \
+          --set-env-vars INSTANCE_CONNECTION_NAME=${_INSTANCE_CONNECTION_NAME}
 
 images:
   - 'us-central1-docker.pkg.dev/${_PROJECT_ID}/${_ARTIFACT_REPO}/${_APP_NAME}:$SHORT_SHA'
@@ -50,6 +51,7 @@ substitutions:
   _ARTIFACT_REPO: "spn-art"
   _INSTANCE_CONNECTION_NAME: "spn-run:us-central1:spn-sql"
 
+
 options:
   env:
     - PROJECT_ID=${_PROJECT_ID}
@@ -57,4 +59,3 @@ options:
     - LOG_BUCKET=${_LOG_BUCKET}
 
 logsBucket: "gs://${_LOG_BUCKET}"
-
