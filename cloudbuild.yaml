@@ -37,14 +37,7 @@ steps:
         gcloud secrets versions access latest --secret=db-password
         echo "secret fetched?"
 
-                echo "Fetching Secrets..."
-        DB_USER=$(gcloud secrets versions access latest --secret=db-user)
-        DB_PASSWORD=$(gcloud secrets versions access latest --secret=db-password)
-        echo "Secrets fetched."
 
-        # Store fetched secrets in environment variables
-        echo "DB_USER=$DB_USER" >> /workspace/env.list
-        echo "DB_PASSWORD=$DB_PASSWORD" >> /workspace/env.list
 
   # Step 4: Deploy the image to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
