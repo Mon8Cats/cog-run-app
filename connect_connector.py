@@ -34,7 +34,7 @@ def connect_with_connector() -> sqlalchemy.engine.base.Engine:
             ip_type=ip_type,
         )
         return conn
-    '
+    
     pool = sqlalchemy.create_engine(
         "postgresql+pg8000://",
         creator=getconn,
