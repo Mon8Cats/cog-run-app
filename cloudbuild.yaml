@@ -49,8 +49,7 @@ steps:
         DB_PASSWORD=$(gcloud secrets versions access latest --secret=db-password)
 
         # Verify secrets (optional debugging)
-        # echo "Fetched DB_USER: $DB_USER"
-        # echo "Fetched DB_PASSWORD: [REDACTED]" # Avoid printing sensitive secrets in logs
+
 
         # Deploy to Cloud Run with environment variables
         gcloud run deploy ${_MY_SERVICE_NAME} \
