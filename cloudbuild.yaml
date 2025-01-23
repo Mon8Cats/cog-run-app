@@ -69,4 +69,3 @@ options:
     - LOG_BUCKET=${_LOG_BUCKET}
 
 logsBucket: "gs://${_LOG_BUCKET}"
-

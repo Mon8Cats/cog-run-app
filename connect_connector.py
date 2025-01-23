@@ -12,12 +12,14 @@ def connect_with_connector() -> sqlalchemy.engine.base.Engine:
 
     Uses the Cloud SQL Python Connector package.
     """    
-    instance_connection_name = os.environ[
-        "INSTANCE_CONNECTION_NAME"
-    ]  # e.g. 'project:region:instance'
-    db_user = os.environ["DB_USER"]  # e.g. 'my-db-user'
-    db_pass = os.environ["DB_PASSWORD"]  # e.g. 'my-db-password'
-    db_name = os.environ["DB_NAME"]  # e.g. 'my-database'
+    #instance_connection_name = os.environ["INSTANCE_CONNECTION_NAME"] 
+    #db_user = os.environ["DB_USER"]
+    #db_pass = os.environ["DB_PASSWORD"] 
+    #db_name = os.environ["DB_NAME"]  
+    instance_connection_name = "spn-run:us-central1:spn-sql"
+    db_user = "db-user"
+    db_pass = "db-password"
+    db_name = "spn-db"
 
     ip_type = IPTypes.PRIVATE if os.environ.get("PRIVATE_IP") else IPTypes.PUBLIC
 
