@@ -1,16 +1,14 @@
 steps:
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    id: 'Test Secret Access'    
+    id: 'Test Secret Access'
+    secretEnv: ['DB_USER']
     args:
       - 'echo'
       - '$DB_USER'
-    secretEnv: ['DB_USER']
 
-availableSecrets:
-  secretManager:
-  - versionName: projects/spn-run/secrets/db-user/versions/latest
-    env: 'DB_USER'
-
+secrets:
+  - secretEnv:
+      DB_USER: projects/spn-run/secrets/db-user/versions/latest
 
 
 options:
