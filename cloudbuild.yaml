@@ -1,48 +1,11 @@
 steps:
-  # Debugging step: Check environment variables and substitutions before build
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    id: 'Debug Before Build'
-    entrypoint: 'bash'
+    id: 'Test Secret Access'
+    secretEnv: ['DB_USER']
     args:
-      - '-c'
-      - |
-        echo "Environment Variables and Substitutions Before Build:"
-        env
-        echo "Substitutions:"
-        echo "PROJECT_ID: ${_PROJECT_ID}"
-        echo "PROJECT_NUMBER: ${_PROJECT_NUMBER}"
-        echo "LOG_BUCKET: ${_LOG_BUCKET}"
-        echo "INSTANCE_CONNECTION_NAME: ${_INSTANCE_CONNECTION_NAME}"
+      - 'echo'
+      - '$DB_USER'
 
-  # Step 1: Build the Docker image
-  - name: 'gcr.io/cloud-builders/docker'
-    id: 'Build Docker Image'
-    args: ['build', '-t', 'us-central1-docker.pkg.dev/${_PROJECT_ID}/${_ARTIFACT_REPO}/${_APP_NAME}:$SHORT_SHA', '.']
-
-  # Step 2: Push the Docker image to Artifact Registry
-  - name: 'gcr.io/cloud-builders/docker'
-    id: 'Push Docker Image'
-    args: ['push', 'us-central1-docker.pkg.dev/${_PROJECT_ID}/${_ARTIFACT_REPO}/${_APP_NAME}:$SHORT_SHA']
-
-  # Step 3: Deploy to Cloud Run
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    id: 'Deploy to Cloud Run'
-    entrypoint: 'bash'
-    secretEnv: ['DB_USER', 'DB_PASSWORD']
-    args:
-      - '-c'
-      - |
-        echo "Deploying to Cloud Run..."
-        gcloud run deploy my-flask123 \
-          --image=us-central1-docker.pkg.dev/${_PROJECT_ID}/${_ARTIFACT_REPO}/${_APP_NAME}:$SHORT_SHA \
-          --region=us-central1 \
-          --platform=managed \
-          --allow-unauthenticated \
-          --service-account="sa-cloud-run@spn-run.iam.gserviceaccount.com" \
-          --add-cloudsql-instances=spn-run:us-central1:spn-sql \
-          --set-env-vars DB_USER="$DB_USER" \
-          --set-env-vars DB_PASSWORD="$DB_PASSWORD" \
-          --set-env-vars INSTANCE_CONNECTION_NAME="${_INSTANCE_CONNECTION_NAME}"
 
 images:
   - 'us-central1-docker.pkg.dev/${_PROJECT_ID}/${_ARTIFACT_REPO}/${_APP_NAME}:$SHORT_SHA'
