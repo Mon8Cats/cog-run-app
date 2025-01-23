@@ -11,11 +11,11 @@ app = Flask(__name__)
 logger = logging.getLogger()
 
 # Database configuration
-DB_USER = os.getenv("DB_USER", "db-user")  # Now retrieved from environment variables
-DB_PASSWORD = os.getenv("DB_PASSWORD", "db-password")
-DB_NAME = os.getenv("DB_NAME", "spn-db")
-DB_HOST = "/cloudsql/spn-run:us-central1:spn-sql"
-DB_PORT = 5432
+DB_USER = os.getenv("DB_USER", "db-userx")  # Now retrieved from environment variables
+DB_PASSWORD = os.getenv("DB_PASSWORD", "db-passwordx")
+DB_NAME = os.getenv("DB_NAME", "spn-dbx")
+DB_HOST = os.getenv("DB_HOST","/cloudsql/spn-run:us-central1:spn-sqlx")
+DB_PORT = os.getenv("DB_PORT", "5432x")
 
 # Global connection pool
 db_pool = None
