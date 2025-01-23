@@ -79,9 +79,4 @@ substitutions:
   _CUSTOM_SERVICE_ACCOUNT: "sa-cloud-run@spn-run.iam.gserviceaccount.com"
   _INSTANCE_CONNECTION_NAME: "spn-run:us-central1:spn-sql"
 
-options:
-  env:
-    - PROJECT_ID=${_PROJECT_ID}
-    - PROJECT_NUMBER=${_PROJECT_NUMBER}
-    - LOG_BUCKET=${_LOG_BUCKET}
 
