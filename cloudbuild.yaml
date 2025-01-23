@@ -46,6 +46,7 @@ steps:
       - |
         # Fetch secrets from Secret Manager
         DB_USER=$(gcloud secrets versions access latest --secret=db-user)
+        DB_PASSWORD=$(gcloud secrets versions access latest --secret=db-password)
 
         # Deploy to Cloud Run with environment variables
         gcloud run deploy ${_MY_SERVICE_NAME} \
