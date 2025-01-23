@@ -59,7 +59,7 @@ steps:
           --allow-unauthenticated \
           --add-cloudsql-instances=${_INSTANCE_CONNECTION_NAME} \
           --service-account=${_CUSTOM_SERVICE_ACCOUNT}@${_PROJECT_ID}.iam.gserviceaccount.com \
-          --set-env-vars=DB_USER=${_DB_USER},DB_PASSWORD=${_DB_PASSWORD},INSTANCE_CONNECTION_NAME=${_INSTANCE_CONNECTION_NAME},DB_PORT=${_DB_PORT},DB_NAME=${_DB_NAME}
+          --set-env-vars=DB_USER=${_DB_USER},DB_PASSWORD=${_DB_PASSWORD},INSTANCE_CONNECTION_NAME=${_INSTANCE_CONNECTION_NAME},DB_PORT=${_DB_PORT},DB_NAME=${_DB_NAME},PROJECT_ID=${_PROJECT_ID}
 
 
   # Step 5: Verify the deployment status

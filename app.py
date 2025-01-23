@@ -6,6 +6,7 @@ import logging
 from flask import Flask, render_template, request, Response
 from psycopg2 import pool
 import psycopg2
+import google.cloud.secretmanager as secretmanager
 
 app = Flask(__name__)
 
@@ -24,6 +25,17 @@ DB_HOST = f"/cloudsql/{INSTANCE_CONNECTION_NAME}"
 db_pool = None
 
 
+# Function to access secrets
+def access_secret_version(secret_id, version_id="latest"):
+    client = secretmanager.SecretManagerServiceClient()
+    name = f"projects/{os.getenv('PROJECT_ID')}/secrets/{secret_id}/versions/{version_id}"
+    response = client.access_secret_version(request={"name": name})
+    return response.payload.data.decode("UTF-8")
+
+
+# Fetching database credentials from Secret Manager
+db_user = access_secret_version("db-user")
+db_password = access_secret_version("db-password")
 
 def init_connection_pool():
     """Initializes the psycopg2 connection pool."""
@@ -33,8 +45,8 @@ def init_connection_pool():
         host=DB_HOST,
         port=DB_PORT,
         database=DB_NAME,
-        user=DB_USER,
-        password=DB_PASSWORD,
+        user=db_user,
+        password=db_password,
     )
 
 
