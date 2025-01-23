@@ -22,17 +22,6 @@ DB_PORT = os.getenv("DB_PORT", "5432x")
 db_pool = None
 
 
-try:
-    connection = psycopg2.connect(
-        user=DB_USER,
-        password=DB_PASSWORD,
-        host=DB_HOST,
-        dbname=DB_NAME
-    )
-    print("Connection successful!")
-except psycopg2.OperationalError as e:
-    print(f"Error: {e}")
-
 
 def init_connection_pool():
     """Initializes the psycopg2 connection pool."""
