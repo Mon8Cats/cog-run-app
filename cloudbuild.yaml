@@ -44,7 +44,7 @@ steps:
     args:
       - '-c'
       - |
-        gcloud run deploy my-flask123 \
+        gcloud run deploy ${_MY_SERVICE_NAME} \
           --image=us-central1-docker.pkg.dev/${_PROJECT_ID}/${_ARTIFACT_REPO}/${_APP_NAME}:$SHORT_SHA \
           --region=us-central1 \
           --platform=managed \
@@ -62,7 +62,7 @@ steps:
       - 'run'
       - 'services'
       - 'describe'
-      - 'my-flask123'
+      - '${_MY_SERVICE_NAME}'
       - '--region=us-central1'
 
       
@@ -83,4 +83,5 @@ substitutions:
   _DB_NAME : "spn-db"
   _DB_HOST : "/cloudsql/spn-run:us-central1:spn-sql"
   _DB_PORT : "5432"
+  _MY_SERVICE_NAME: 'my-flask12'
 
