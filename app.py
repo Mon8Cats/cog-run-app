@@ -15,8 +15,10 @@ logger = logging.getLogger()
 DB_USER = os.getenv("DB_USER", "db-userx")  # Now retrieved from environment variables
 DB_PASSWORD = os.getenv("DB_PASSWORD", "db-passwordx")
 DB_NAME = os.getenv("DB_NAME", "spn-dbx")
-DB_HOST = os.getenv("DB_HOST","/cloudsql/spn-run:us-central1:spn-sqlx")
+#DB_HOST = os.getenv("DB_HOST","/cloudsql/spn-run:us-central1:spn-sqlx")
 DB_PORT = os.getenv("DB_PORT", "5432x")
+INSTANCE_CONNECTION_NAME = os.getenv("INSTANCE_CONNECTION_NAME", "spn-run:us-central1:spn-sqlx")
+DB_HOST = f"/cloudsql/{INSTANCE_CONNECTION_NAME}"
 
 # Global connection pool
 db_pool = None
