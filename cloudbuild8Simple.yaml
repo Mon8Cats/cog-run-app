@@ -1,0 +1,22 @@
+steps:
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: 'Test Secret Access'
+    entrypoint: bash
+    args:
+      - 'echo'
+      - '$DB_USER'
+    secretEnv: ['DB_USER']
+
+availableSecrets:
+  secretManager:
+  - versionName: projects/spn-run/secrets/db-user/versions/latest
+    env: DB_USER
+
+
+options:
+  env:
+    - PROJECT_ID=${_PROJECT_ID}
+    - PROJECT_NUMBER=${_PROJECT_NUMBER}
+    - LOG_BUCKET=${_LOG_BUCKET}
+
+logsBucket: "gs://${_LOG_BUCKET}"

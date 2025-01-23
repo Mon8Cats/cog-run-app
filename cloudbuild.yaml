@@ -1,17 +1,83 @@
 steps:
+  # Step 1: Build the Docker image
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'Build Docker Image'
+    args: ['build', '-t', 'us-central1-docker.pkg.dev/${_PROJECT_ID}/${_ARTIFACT_REPO}/${_APP_NAME}:$SHORT_SHA', '.']
+
+  # Step 2: Push the Docker image to Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'Push Docker Image'
+    args: ['push', 'us-central1-docker.pkg.dev/${_PROJECT_ID}/${_ARTIFACT_REPO}/${_APP_NAME}:$SHORT_SHA']
+
+  # Step 3: Debug Step - Check environment variables before deployment
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    id: 'Test Secret Access'
-    entrypoint: bash
+    id: 'Debug Environment Variables'
+    entrypoint: 'bash'
     args:
-      - 'echo'
-      - '$DB_USER'
-    secretEnv: ['DB_USER']
+      - '-c'
+      - |
+        echo "Active Service Account:"
+        gcloud auth list
+        echo "Debugging Environment Variables:"
+        echo "PROJECT_ID: ${_PROJECT_ID}"
+        echo "PROJECT_NUMBER: ${_PROJECT_NUMBER}"
+        echo "INSTANCE_CONNECTION_NAME: ${_INSTANCE_CONNECTION_NAME}"
 
-availableSecrets:
-  secretManager:
-  - versionName: projects/spn-run/secrets/db-user/versions/latest
-    env: DB_USER
+        # Explicitly set the project context
+        gcloud config set project ${_PROJECT_ID}
 
+        echo "Checking Authentication:"
+        gcloud auth print-access-token
+
+        gcloud iam roles describe roles/iam.serviceAccountTokenCreator
+        gcloud auth list
+
+        echo "Testing secret access..."
+        gcloud secrets versions access latest --secret=db-user
+        gcloud secrets versions access latest --secret=db-password
+        echo "secret fetched?"
+
+
+
+  # Step 4: Deploy the image to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: 'Deploy to Cloud Run'
+    entrypoint: 'gcloud'
+    args:
+      - 'run'
+      - 'deploy'
+      - 'my-flask123'
+      - '--image=us-central1-docker.pkg.dev/${_PROJECT_ID}/${_ARTIFACT_REPO}/${_APP_NAME}:$SHORT_SHA'
+      - '--region=us-central1'
+      - '--platform=managed'
+      - '--allow-unauthenticated'
+
+
+
+  # Step 5: Verify the deployment status
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: 'Check Deployment Status'
+    entrypoint: 'gcloud'
+    args:
+      - 'run'
+      - 'services'
+      - 'describe'
+      - 'my-flask123'
+      - '--region=us-central1'
+
+      
+images:
+  - 'us-central1-docker.pkg.dev/${_PROJECT_ID}/${_ARTIFACT_REPO}/${_APP_NAME}:$SHORT_SHA'
+
+timeout: '1200s'
+
+logsBucket: "gs://${_LOG_BUCKET}"
+
+substitutions:
+  _APP_NAME: "my-flask1"
+  _ARTIFACT_REPO: "spn-art"
+  _CUSTOM_SERVICE_ACCOUNT: "sa-cloud-run@spn-run.iam.gserviceaccount.com"
+  _INSTANCE_CONNECTION_NAME: "spn-run:us-central1:spn-sql"
 
 options:
   env:
@@ -19,4 +85,3 @@ options:
     - PROJECT_NUMBER=${_PROJECT_NUMBER}
     - LOG_BUCKET=${_LOG_BUCKET}
 
-logsBucket: "gs://${_LOG_BUCKET}"
