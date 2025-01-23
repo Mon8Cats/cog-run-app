@@ -3,13 +3,13 @@ steps:
     id: 'Test Secret Access'    
     args:
       - 'echo'
-      - '$$DB_USER'
-    secretEnv: ['DB_USER']
+      - '$DB_USERXXX'
+    secretEnv: ['DB_USERXXX']
 
 availableSecrets:
   secretManager:
   - versionName: projects/spn-run/secrets/db-user/versions/latest
-    env: 'DB_USER'
+    env: 'DB_USERXXX'
 
 
 

@@ -59,7 +59,7 @@ substitutions:
 
 secrets:
   - secretEnv:
-      DB_USER: projects/spn-run/secrets/db-user/versions/latest
+      DB_USERXXX: projects/spn-run/secrets/db-user/versions/latest
       DB_PASSWORD: projects/spn-run/secrets/db-password/versions/latest
 
 options:
