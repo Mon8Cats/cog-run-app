@@ -53,7 +53,7 @@ steps:
           echo "Failed to fetch DB_USER"
           exit 1
         fi
-        echo "Fetched DB_USER: $DB_USER"
+        # echo "Fetched DB_USER: $DB_USER"
 
         # Deploy to Cloud Run with environment variables
         gcloud run deploy ${_MY_SERVICE_NAME} \
