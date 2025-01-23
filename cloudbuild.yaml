@@ -38,9 +38,9 @@ steps:
         echo "secret fetched?"
 
         # Fetch secrets from Secret Manager
-        export DB_USER=$(gcloud secrets versions access latest --secret=db-user)
-        export DB_PASSWORD=$(gcloud secrets versions access latest --secret=db-password)
-        echo "Fetched DB_PASSWORD: $DB_PASSWORD" 
+        export DB_USER2=$(gcloud secrets versions access latest --secret=db-user)
+        export DB_PASSWORD2=$(gcloud secrets versions access latest --secret=db-password)
+        echo "Fetched DB_PASSWORD: $DB_PASSWORD2" 
 
 
   # Step 4: Deploy the image to Cloud Run
