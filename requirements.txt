@@ -7,5 +7,5 @@ functions-framework==3.5.0
 Werkzeug==2.3.7
 psycopg2-binary
 pg8000==1.31.2
-google-cloud-secretmanager
+google-cloud-secret-manager
 python-dotenv
