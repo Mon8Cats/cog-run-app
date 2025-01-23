@@ -6,7 +6,6 @@ import logging
 import os
 
 from flask import Flask, render_template, request, Response
-from psycopg2 import pool
 
 import sqlalchemy
 
@@ -19,18 +18,9 @@ app = Flask(__name__)
 
 logger = logging.getLogger()
 
-DB_HOST = "/cloudsql/spn-run:us-central1:spn-sql"
 
-def init_connection_pool():
-    return pool.SimpleConnectionPool(
-        minconn=1,
-        maxconn=10,  # Adjust max connections based on your app's needs
-        host=DB_HOST,
-        port=5432,
-        database="spn-db",
-        user="db-user",
-        password="db-password",
-    ) 
+def init_connection_pool() -> sqlalchemy.engine.base.Engine:
+    return connect_with_connector()
 
 # create 'votes' table in database if it does not already exist
 def migrate_db(db: sqlalchemy.engine.base.Engine) -> None:
