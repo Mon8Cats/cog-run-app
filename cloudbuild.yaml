@@ -49,7 +49,7 @@ steps:
         DB_PASSWORD=$(gcloud secrets versions access latest --secret=db-password)
 
         # Verify secrets (optional debugging)
-         # Write secrets to .env file
+        # Write secrets to .env file
         echo "DB_USER=$DB_USER" > .env
         echo "DB_PASSWORD=$DB_PASSWORD" >> .env
         echo "DB_HOST=${_DB_HOST}" >> .env
