@@ -4,11 +4,18 @@ steps:
     secretEnv: ['DB_USER']
     args:
       - 'echo'
-      - '$DB_USER'
+      - '$$DB_USER'
 
 secrets:
   - secretEnv:
       DB_USER: projects/spn-run/secrets/db-user/versions/latest
+
+availableSecrets:
+  secretManager:
+  - versionName: projects/spn-run/secrets/db-user/versions/latest
+    env: 'DB_USER'
+  - versionName: projects/spn-run/secrets/db-password/versions/latest
+    env: 'DB_PASSWORD'
 
 
 options:
