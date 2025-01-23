@@ -88,5 +88,8 @@ substitutions:
   _DB_NAME : "spn-db"
   _DB_PORT : "5432"
   _MY_SERVICE_NAME: 'my-flask-new'
-  DB_USER : ""
+
+options:
+  env:
+    - DB_USER=""
 
