@@ -38,10 +38,10 @@ steps:
         echo "secret fetched?"
 
         # Fetch secrets from Secret Manager
-        #DB_USER=$(gcloud secrets versions access latest --secret=db-user)
-        #echo "Fetched DB_USER: $DB_USER" 
-        #DB_PASSWORD=$(gcloud secrets versions access latest --secret=db-password)
-        #echo "Fetched DB_USER: $DB_USER" 
+        # DB_USER=$(gcloud secrets versions access latest --secret=db-user)
+        # echo "Fetched DB_USER: $DB_USER" 
+        # DB_PASSWORD=$(gcloud secrets versions access latest --secret=db-password)
+        # echo "Fetched DB_USER: $DB_USER" 
         
 
 
