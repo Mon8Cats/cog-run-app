@@ -50,12 +50,6 @@ steps:
 
         # Verify secrets (optional debugging)
         # Write secrets to .env file
-        echo "DB_USER=$DB_USER" > .env
-        echo "DB_PASSWORD=$DB_PASSWORD" >> .env
-        echo "DB_HOST=${_DB_HOST}" >> .env
-        echo "DB_PORT=${_DB_PORT}" >> .env
-        echo "DB_NAME=${_DB_NAME}" >> .env
-
 
         # Deploy to Cloud Run with environment variables
         gcloud run deploy ${_MY_SERVICE_NAME} \
