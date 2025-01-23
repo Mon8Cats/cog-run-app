@@ -51,7 +51,7 @@ steps:
           --allow-unauthenticated \
           --add-cloudsql-instances=spn-run:us-central1:spn-sql
           --service-account=${_CUSTOM_SERVICE_ACCOUNT}
-          --set-env-vars=DB_USER=$DB_USER,DB_PASSWORD=$DB_PASSWORD,DB_HOST=${_DB_HOST},DB_PORT=${_DB_PORT},DB_NAME=${_DB_NAME}
+          --set-env-vars=DB_USER=${_DB_USER},DB_PASSWORD=${_DB_PASSWORD},DB_HOST=${_DB_HOST},DB_PORT=${_DB_PORT},DB_NAME=${_DB_NAME}
 
 
   # Step 5: Verify the deployment status
