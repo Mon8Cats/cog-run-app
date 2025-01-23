@@ -47,6 +47,7 @@ steps:
         # Fetch secrets from Secret Manager
         DB_USER=$(gcloud secrets versions access latest --secret=db-user)
         DB_PASSWORD=$(gcloud secrets versions access latest --secret=db-password)
+        echo "Fetched DB_USER: $DB_USER"
 
         # Deploy to Cloud Run with environment variables
         gcloud run deploy my-service \
@@ -54,7 +55,7 @@ steps:
           --region=us-central1 \
           --platform=managed \
           --allow-unauthenticated \
-          --set-env-vars=DB_USER=$DB_USER,DB_PASSWORD=$DB_PASSWORD,DB_HOST=${_DB_HOST},DB_PORT=${_DB_PORT},DB_NAME=${_DB_NAME}
+          --set-env-vars=DB_USER=${_DB_USER},DB_PASSWORD=${_DB_PASSWORD},DB_HOST=${_DB_HOST},DB_PORT=${_DB_PORT},DB_NAME=${_DB_NAME}
 
 
   # Step 5: Verify the deployment status
