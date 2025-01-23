@@ -48,13 +48,6 @@ steps:
         DB_USER=$(gcloud secrets versions access latest --secret=db-user)
         DB_PASSWORD=$(gcloud secrets versions access latest --secret=db-password)
 
-        # Verify secrets (optional debugging)
-        if [ -z "$DB_USER" ]; then
-          echo "Failed to fetch DB_USER"
-          exit 1
-        fi
-        # echo "Fetched DB_USER: $DB_USER"
-
         # Deploy to Cloud Run with environment variables
         gcloud run deploy ${_MY_SERVICE_NAME} \
           --image=us-central1-docker.pkg.dev/${_PROJECT_ID}/${_ARTIFACT_REPO}/${_APP_NAME}:$SHORT_SHA \
