@@ -40,19 +40,18 @@ steps:
   # Step 4: Deploy the image to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     id: 'Deploy to Cloud Run'
-    entrypoint: 'gcloud'
+    entrypoint: 'bash'
     args:
-      - 'run'
-      - 'deploy'
-      - 'my-flask123'
-      - '--image=us-central1-docker.pkg.dev/${_PROJECT_ID}/${_ARTIFACT_REPO}/${_APP_NAME}:$SHORT_SHA'
-      - '--region=us-central1'
-      - '--platform=managed'
-      - '--allow-unauthenticated'
-      - '--add-cloudsql-instances=spn-run:us-central1:spn-sql'
-      - '--service-account=${_CUSTOM_SERVICE_ACCOUNT}'
-      - '--set-env-vars=DB_USER=${_DB_USER},DB_PASSWORD=${_DB_PASSWORD},DB_HOST=${_DB_HOST},DB_PORT=${_DB_PORT},DB_NAME=${_DB_NAME}'
-
+      - '-c'
+      - |
+        gcloud run deploy my-flask123 \
+          --image=us-central1-docker.pkg.dev/${_PROJECT_ID}/${_ARTIFACT_REPO}/${_APP_NAME}:$SHORT_SHA \
+          --region=us-central1 \
+          --platform=managed \
+          --allow-unauthenticated \
+          --add-cloudsql-instances=spn-run:us-central1:spn-sql
+          --service-account=${_CUSTOM_SERVICE_ACCOUNT}
+          --set-env-vars=DB_USER=$DB_USER,DB_PASSWORD=$DB_PASSWORD,DB_HOST=${_DB_HOST},DB_PORT=${_DB_PORT},DB_NAME=${_DB_NAME}
 
 
   # Step 5: Verify the deployment status
