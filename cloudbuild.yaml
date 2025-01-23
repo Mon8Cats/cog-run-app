@@ -6,24 +6,10 @@ steps:
       - 'echo'
       - '$DB_USER'
 
-
-images:
-  - 'us-central1-docker.pkg.dev/${_PROJECT_ID}/${_ARTIFACT_REPO}/${_APP_NAME}:$SHORT_SHA'
-
-timeout: '1200s'
-
-substitutions:
-  _APP_NAME: "my-flask1"
-  _ARTIFACT_REPO: "spn-art"
-  _INSTANCE_CONNECTION_NAME: "spn-run:us-central1:spn-sql"
-  _PROJECT_ID: "your-project-id"
-  _PROJECT_NUMBER: "your-project-number"
-  _LOG_BUCKET: "your-log-bucket"
-
 secrets:
   - secretEnv:
       DB_USER: projects/spn-run/secrets/db-user/versions/latest
-      DB_PASSWORD: projects/spn-run/secrets/db-password/versions/latest
+
 
 options:
   env:
