@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import os
 import datetime
 import logging
 from flask import Flask, render_template, request, Response
@@ -11,10 +10,10 @@ app = Flask(__name__)
 logger = logging.getLogger()
 
 # Database configuration
-DB_USER = os.getenv("DB_USER", "db-user")  # Now retrieved from environment variables
-DB_PASSWORD = os.getenv("DB_PASSWORD", "db-password")
-DB_NAME = os.getenv("DB_NAME", "spn-db")
 DB_HOST = "/cloudsql/spn-run:us-central1:spn-sql"
+DB_NAME = "spn-db"
+DB_USER = "db-user"
+DB_PASSWORD = "db-password"
 DB_PORT = 5432
 
 # Global connection pool
