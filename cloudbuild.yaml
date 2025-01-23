@@ -57,8 +57,8 @@ steps:
           echo "Failed to fetch DB_PASSWORD"
           exit 1
         fi
-        echo "Fetched DB_USER: $DB_USER"
-        echo "Fetched DB_PASSWORD: [REDACTED]" # Avoid printing sensitive secrets in logs
+        # echo "Fetched DB_USER: $DB_USER"
+        # echo "Fetched DB_PASSWORD: [REDACTED]" # Avoid printing sensitive secrets in logs
 
         # Deploy to Cloud Run with environment variables
         gcloud run deploy ${_MY_SERVICE_NAME} \
