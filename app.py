@@ -1,152 +1,144 @@
-
 from __future__ import annotations
 
 import datetime
 import logging
-import os
-
 from flask import Flask, render_template, request, Response
 from psycopg2 import pool
-
-import sqlalchemy
-
-from connect_connector import connect_with_connector
-from connect_connector_auto_iam_authn import connect_with_connector_auto_iam_authn
-from connect_tcp import connect_tcp_socket
-from connect_unix import connect_unix_socket
 
 app = Flask(__name__)
 
 logger = logging.getLogger()
 
+# Database configuration
 DB_HOST = "/cloudsql/spn-run:us-central1:spn-sql"
+DB_NAME = "spn-db"
+DB_USER = "db-user"
+DB_PASSWORD = "db-password"
+DB_PORT = 5432
+
+# Global connection pool
+db_pool = None
+
 
 def init_connection_pool():
+    """Initializes the psycopg2 connection pool."""
     return pool.SimpleConnectionPool(
         minconn=1,
         maxconn=10,  # Adjust max connections based on your app's needs
         host=DB_HOST,
-        port=5432,
-        database="spn-db",
-        user="db-user",
-        password="db-password",
-    ) 
-
-# create 'votes' table in database if it does not already exist
-def migrate_db(db: sqlalchemy.engine.base.Engine) -> None:
-    """Creates the `votes` table if it doesn't exist."""
-    with db.connect() as conn:
-        conn.execute(
-            sqlalchemy.text(
-                "CREATE TABLE IF NOT EXISTS votes "
-                "( vote_id SERIAL NOT NULL, time_cast timestamp NOT NULL, "
-                "candidate VARCHAR(6) NOT NULL, PRIMARY KEY (vote_id) );"
-            )
-        )
-        conn.commit()
+        port=DB_PORT,
+        database=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD,
+    )
 
 
-db = None
+def migrate_db():
+    """Creates the 'votes' table in the database if it does not exist."""
+    conn = db_pool.getconn()
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS votes (
+                    id SERIAL PRIMARY KEY,
+                    candidate VARCHAR(255) NOT NULL,
+                    time_cast TIMESTAMP NOT NULL DEFAULT NOW()
+                )
+            """)
+            conn.commit()
+    finally:
+        db_pool.putconn(conn)
 
 
-@app.before_request
-def init_db() -> sqlalchemy.engine.base.Engine:
-    """Initiates connection to database and its structure."""
-    global db
-    if db is None:
-        db = init_connection_pool()
-        migrate_db(db)
+@app.before_first_request
+def setup_db():
+    """Sets up the connection pool and migrates the database schema."""
+    global db_pool
+    if db_pool is None:
+        db_pool = init_connection_pool()
+        migrate_db()
 
 
 @app.route("/", methods=["GET"])
 def render_index() -> str:
     """Serves the index page of the app."""
-    context = get_index_context(db)
-    return render_template("index.html", **context)
+    conn = db_pool.getconn()
+    try:
+        context = get_index_context(conn)
+        return render_template("index.html", **context)
+    finally:
+        db_pool.putconn(conn)
 
 
 @app.route("/votes", methods=["POST"])
 def cast_vote() -> Response:
-    """Processes a single vote from user."""
+    """Processes a single vote from the user."""
     team = request.form["team"]
-    return save_vote(db, team)
+    conn = db_pool.getconn()
+    try:
+        return save_vote(conn, team)
+    finally:
+        db_pool.putconn(conn)
 
 
-# get_index_context gets data required for rendering HTML application
-def get_index_context(db: sqlalchemy.engine.base.Engine) -> dict:
-    """Retrieves data from the database about the votes.
-
-    Args:
-        db: Connection to the database.
-    Returns:
-        A dictionary containing information about votes.
-    """
+def get_index_context(conn) -> dict:
+    """Retrieves data from the database about the votes."""
     votes = []
-
-    with db.connect() as conn:
-        # Execute the query and fetch all results
-        recent_votes = conn.execute(
-            sqlalchemy.text(
+    try:
+        with conn.cursor() as cursor:
+            # Fetch recent votes
+            cursor.execute(
                 "SELECT candidate, time_cast FROM votes ORDER BY time_cast DESC LIMIT 5"
             )
-        ).fetchall()
-        # Convert the results into a list of dicts representing votes
-        for row in recent_votes:
-            votes.append({"candidate": row[0], "time_cast": row[1]})
+            rows = cursor.fetchall()
+            votes = [{"candidate": row[0], "time_cast": row[1]} for row in rows]
 
-        stmt = sqlalchemy.text(
-            "SELECT COUNT(vote_id) FROM votes WHERE candidate=:candidate"
-        )
-        # Count number of votes for tabs
-        tab_count = conn.execute(stmt, parameters={"candidate": "TABS"}).scalar()
-        # Count number of votes for spaces
-        space_count = conn.execute(stmt, parameters={"candidate": "SPACES"}).scalar()
+            # Fetch vote counts
+            cursor.execute("SELECT COUNT(*) FROM votes WHERE candidate = %s", ("TABS",))
+            tab_count = cursor.fetchone()[0]
 
-    return {
-        "space_count": space_count,
-        "recent_votes": votes,
-        "tab_count": tab_count,
-    }
+            cursor.execute("SELECT COUNT(*) FROM votes WHERE candidate = %s", ("SPACES",))
+            space_count = cursor.fetchone()[0]
+
+        return {
+            "space_count": space_count,
+            "recent_votes": votes,
+            "tab_count": tab_count,
+        }
+    except Exception as e:
+        logger.exception("Error fetching index context: %s", e)
+        raise
 
 
-# save_vote saves a vote to the database that was retrieved from form data
-def save_vote(db: sqlalchemy.engine.base.Engine, team: str) -> Response:
-    """Saves a single vote into the database.
-
-    Args:
-        db: Connection to the database.
-        team: The identifier of a team the vote is cast on.
-    Returns:
-        A HTTP response that can be sent to the client.
-    """
+def save_vote(conn, team: str) -> Response:
+    """Saves a single vote into the database."""
     time_cast = datetime.datetime.now(tz=datetime.timezone.utc)
-    # Verify that the team is one of the allowed options
-    if team != "TABS" and team != "SPACES":
+
+    if team not in ["TABS", "SPACES"]:
         logger.warning(f"Received invalid 'team' property: '{team}'")
         return Response(
             response="Invalid team specified. Should be one of 'TABS' or 'SPACES'",
             status=400,
         )
 
-    stmt = sqlalchemy.text(
-        "INSERT INTO votes (time_cast, candidate) VALUES (:time_cast, :candidate)"
-    )
     try:
-        with db.connect() as conn:
-            conn.execute(stmt, parameters={"time_cast": time_cast, "candidate": team})
+        with conn.cursor() as cursor:
+            cursor.execute(
+                "INSERT INTO votes (time_cast, candidate) VALUES (%s, %s)",
+                (time_cast, team),
+            )
             conn.commit()
+        return Response(
+            status=200,
+            response=f"Vote successfully cast for '{team}' at time {time_cast}!",
+        )
     except Exception as e:
-        logger.exception(e)
+        logger.exception("Error saving vote: %s", e)
         return Response(
             status=500,
-            response="Unable to successfully cast vote! Please check the "
-            "application logs for more details.",
+            response="Unable to successfully cast vote! Please check the application logs for more details.",
         )
 
-    return Response(
-        status=200,
-        response=f"Vote successfully cast for '{team}' at time {time_cast}!",
-    )
 
 if __name__ == "__main__":
-    app.run(host="127.0.0.1", port=8080, debug=True)
+    app.run(host="0.0.0.0", port=8080)

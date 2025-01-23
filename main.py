@@ -6,27 +6,32 @@ import functions_framework
 
 from app import get_index_context, init_connection_pool, migrate_db, save_vote
 
-db = None
 
+db_pool = None  # Global variable for connection pool
 
 @functions_framework.http
 def votes(request: flask.Request) -> flask.Response:
-    global db
-    # initialize db within request context
-    if not db:
-        # initiate a connection pool to a Cloud SQL database
-        db = init_connection_pool()
-        # creates required 'votes' table in database (if it does not exist)
-        migrate_db(db)
-    if request.method == "GET":
-        context = get_index_context(db)
-        return flask.render_template("index.html", **context)
+    global db_pool
+    # Initialize connection pool if it doesn't exist
+    if not db_pool:
+        db_pool = init_connection_pool()
 
-    if request.method == "POST":
-        team = request.form["team"]
-        return save_vote(db, team)
+    # Fetch a connection from the pool
+    conn = db_pool.getconn()
+    try:
+        # Perform operations using the connection
+        if request.method == "GET":
+            context = get_index_context(conn)  # Pass connection instead of pool
+            return flask.render_template("index.html", **context)
 
-    return flask.Response(
-        response="Invalid http request. Method not allowed, must be 'GET' or 'POST'",
-        status=400,
-    )
+        if request.method == "POST":
+            team = request.form["team"]
+            return save_vote(conn, team)
+
+        return flask.Response(
+            response="Invalid HTTP request. Method not allowed, must be 'GET' or 'POST'",
+            status=400,
+        )
+    finally:
+        # Return the connection to the pool
+        db_pool.putconn(conn)
