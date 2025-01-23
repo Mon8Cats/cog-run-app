@@ -45,9 +45,6 @@ steps:
       - '-c'
       - |
         # Fetch secrets from Secret Manager
-        # DB_USER=$(gcloud secrets versions access latest --secret=db-user)
-        # DB_PASSWORD=$(gcloud secrets versions access latest --secret=db-password)
-        # echo "Fetched DB_USER: $DB_USER"
 
         # Deploy to Cloud Run with environment variables
         gcloud run deploy my-service \
